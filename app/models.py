@@ -1,4 +1,4 @@
-from app import app, db
+from app import db
 
 
 class User(db.Model):
@@ -54,7 +54,7 @@ class OrderItem(db.Model):
     order_id = db.Column(db.Integer)
     item_id = db.Column(db.Integer)
     quantity = db.Column(db.Integer)
-    price = db.Column(db.String)
+    price = db.Column(db.Float)
     comments = db.Column(db.Text)
 
     order = db.relationship('Order', back_populates='items')
@@ -74,7 +74,8 @@ class Item(db.Model):
     __tablename__ = 'item'
     id = db.Column(db.Integer, primary_key=True)
     label = db.Column(db.String(100))
-    quantity = db.Column(db.Integer)
+    quantity = db.Column(db.Integer)  # This represents the quantity held by the supplier or client
+    unit_price = db.Column(db.Float)  # Price per unit
 
     orders = db.relationship('OrderItem', back_populates='item')
 
@@ -94,7 +95,7 @@ class Company(db.Model):
     name = db.Column(db.String(200))
     business_number = db.Column(db.String(100))  # In Australia this would be the ABN.
 
-    contacts = db.relationship('Contact', back_populates='company')
+    contacts = db.relationship('CompanyContact', back_populates='company')
     orders = db.relationship('Order', back_populates='client')
     clients = db.relationship('SupplierClient', back_populates='supplier')
     suppliers = db.relationship('SupplierClient', back_populates='client')
@@ -109,7 +110,7 @@ class Company(db.Model):
 
 
 class CompanyContact(db.Model):
-    __tablename__ = 'company'
+    __tablename__ = 'company_contact'
     contact_id = db.Column(db.Integer, primary_key=True)
     company_id = db.Column(db.Integer)
 
@@ -117,7 +118,7 @@ class CompanyContact(db.Model):
     company = db.relationship('Company', back_populates='contacts')
 
     def __repr__(self):
-        return '<CompanyClient {}>'.format(self.id)
+        return '<CompanyContact {}>'.format(self.id)
 
     def jsonify(self):
         return {
@@ -135,7 +136,7 @@ class SupplierClient(db.Model):
     client = db.relationship('Company', back_populates='suppliers')
 
     def __repr__(self):
-        return '<Client {}>'.format(self.id)
+        return '<SupplierClient {}>'.format(self.id)
 
     def jsonify(self):
         return {

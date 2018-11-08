@@ -1,10 +1,13 @@
-from app import app, db
+from app import db
 from app.models import Item
+from app.resources.order import order_fields
 from flask_restful import Resource, marshal, fields, reqparse
 
 item_fields = {
-    "label": fields.String
+    "label": fields.String,
+    "quantity": fields.String
 }
+
 
 class ItemResource(Resource):
     def __init__(self):
@@ -35,4 +38,12 @@ class ItemListResource(Resource):
 
     def post(self):
         item = Item()
+        db.session.add(item)
+        db.session.commit()
         return {"item": marshal(item, item_fields)}
+
+
+class OrderListByItemResource(Resource):
+    def get(self, id):
+        item = Item.query.first_or_404(id)
+        return {"orders": marshal([order for order in item.orders], order_fields)}

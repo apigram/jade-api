@@ -1,4 +1,4 @@
-from app import app, db
+from app import db
 from app.models import Company
 from flask_restful import Resource, marshal, fields, reqparse
 
@@ -44,4 +44,6 @@ class ClientListResource(Resource):
 
     def post(self):
         client = Company()
+        db.session.add(client)
+        db.session.commit()
         return {"client": marshal(client, client_fields)}

@@ -1,4 +1,4 @@
-from app import app, db
+from app import db
 from app.models import User, Contact
 from flask_restful import Resource, marshal, reqparse, fields
 
