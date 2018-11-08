@@ -1,9 +1,2 @@
-flask
-flask-cors
-flask-migrate
-flask-restful
-flask-sqlalchemy
-sqlalchemy
-bcrypt
-itsdangerous
-flask-httpauth
+django
+djangorestframework
