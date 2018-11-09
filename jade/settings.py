@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'jadeapi.apps.JadeapiConfig'
+    'api.apps.ApiConfig'
 ]
 
 MIDDLEWARE = [

@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
                 ('delivered_date', models.DateTimeField()),
                 ('status', models.CharField(max_length=100)),
                 ('comments', models.TextField()),
-                ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='client_order', to='jadeapi.Company')),
+                ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='client_order', to='api.Company')),
             ],
         ),
         migrations.CreateModel(
@@ -66,8 +66,8 @@ class Migration(migrations.Migration):
                 ('quantity', models.IntegerField()),
                 ('price', models.FloatField()),
                 ('comments', models.TextField()),
-                ('items', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='jadeapi.Item')),
-                ('orders', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='jadeapi.Order')),
+                ('items', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='api.Item')),
+                ('orders', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='api.Order')),
             ],
         ),
         migrations.CreateModel(
@@ -77,32 +77,32 @@ class Migration(migrations.Migration):
                 ('username', models.CharField(max_length=100)),
                 ('email', models.CharField(max_length=100)),
                 ('password', models.CharField(max_length=1000)),
-                ('contact', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='jadeapi.Contact')),
+                ('contact', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='api.Contact')),
             ],
         ),
         migrations.AddField(
             model_name='order',
             name='items',
-            field=models.ManyToManyField(through='jadeapi.OrderItem', to='jadeapi.Item'),
+            field=models.ManyToManyField(through='api.OrderItem', to='api.Item'),
         ),
         migrations.AddField(
             model_name='order',
             name='supplier',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='supplier_order', to='jadeapi.Company'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='supplier_order', to='api.Company'),
         ),
         migrations.AddField(
             model_name='companycontact',
             name='contact',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='jadeapi.Contact'),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='api.Contact'),
         ),
         migrations.AddField(
             model_name='company',
             name='contact',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='jadeapi.CompanyContact'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='api.CompanyContact'),
         ),
         migrations.AddField(
             model_name='company',
             name='suppliers',
-            field=models.ManyToManyField(related_name='_company_suppliers_+', to='jadeapi.Company'),
+            field=models.ManyToManyField(related_name='_company_suppliers_+', to='api.Company'),
         ),
     ]

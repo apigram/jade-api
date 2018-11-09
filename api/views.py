@@ -1,17 +1,17 @@
-from jadeapi.models import Company, User, Order, Item
+from api.models import Company, User, Order, Item, OrderItem
 from rest_framework import viewsets
-from jadeapi.serializers import UserSerializer, CompanySerializer, ItemSerializer, OrderSerializer
+from api.serializers import UserSerializer, CompanySerializer, ItemSerializer, OrderSerializer, OrderItemSerializer
 
 
 # Create your views here.
 
 class ClientViewSet(viewsets.ModelViewSet):
-    queryset = Company.objects.all()
+    queryset = Company.objects.filter(type='CLIENT').all()
     serializer_class = CompanySerializer
 
 
 class SupplierViewSet(viewsets.ModelViewSet):
-    queryset = Company.objects.all()
+    queryset = Company.objects.filter(type='SUPPLIER').all()
     serializer_class = CompanySerializer
 
 
@@ -28,3 +28,8 @@ class ItemViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+
+
+class OrderItemViewSet(viewsets.ModelViewSet):
+    queryset = OrderItem.objects.all()
+    serializer_class = OrderItemSerializer
