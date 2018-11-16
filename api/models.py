@@ -21,10 +21,6 @@ class User(models.Model):
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE, related_name='+')
 
 
-class CompanyContact(models.Model):
-    contact = models.OneToOneField(Contact, on_delete=models.CASCADE, related_name='+')
-
-
 class Company(models.Model):
     COMPANY_TYPES = (
         ('CLIENT', 'Client'),
@@ -34,7 +30,10 @@ class Company(models.Model):
     business_number = models.CharField(max_length=100, null=False)  # In Australia this would be the ABN.
     type = models.CharField(max_length=20, choices=COMPANY_TYPES, null=False)
 
-    contacts = models.ForeignKey(CompanyContact, on_delete=models.CASCADE)
+
+class CompanyContact(models.Model):
+    company = models.OneToOneField(Company, on_delete=models.CASCADE)
+    contact = models.OneToOneField(Contact, on_delete=models.CASCADE, related_name='+')
 
 
 class Item(models.Model):
@@ -60,5 +59,5 @@ class OrderItem(models.Model):
     price = models.FloatField(null=False)
     comments = models.TextField(null=True)
 
-    orders = models.ForeignKey(Order, on_delete=models.CASCADE)
-    items = models.ForeignKey(Item, on_delete=models.CASCADE)
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    item = models.OneToOneField(Item, on_delete=models.CASCADE)

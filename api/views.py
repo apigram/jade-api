@@ -1,9 +1,14 @@
-from api.models import Company, User, Order, Item, OrderItem
-from rest_framework import viewsets
-from api.serializers import UserSerializer, CompanySerializer, ItemSerializer, OrderSerializer, OrderItemSerializer
+from api.models import Company, User, Order, Item, OrderItem, Contact, CompanyContact
+from rest_framework import viewsets, response
+from api.serializers import UserSerializer, CompanySerializer, ItemSerializer, OrderSerializer, OrderItemSerializers, ItemOrderSerializers, ContactSerializer
 
 
 # Create your views here.
+
+class ContactViewSet(viewsets.ModelViewSet):
+    queryset = Contact.objects.all()
+    serializer_class = ContactSerializer
+
 
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.filter(type='CLIENT').all()
@@ -31,5 +36,12 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 
 class OrderItemViewSet(viewsets.ModelViewSet):
-    queryset = OrderItem.objects.all()
-    serializer_class = OrderItemSerializer
+    def get_queryset(self):
+        return OrderItem.objects.filter(order=self.kwargs['order_pk'])
+    serializer_class = OrderItemSerializers
+
+
+class ItemOrderViewSet(viewsets.ModelViewSet):
+    def get_queryset(self):
+        return OrderItem.objects.filter(item=self.kwargs['item_pk'])
+    serializer_class = ItemOrderSerializers
