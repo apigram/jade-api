@@ -32,7 +32,7 @@ class Company(models.Model):
 
 
 class CompanyContact(models.Model):
-    company = models.OneToOneField(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='contacts')
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE, related_name='+')
 
 
@@ -56,8 +56,8 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     quantity = models.IntegerField(null=False)
-    price = models.FloatField(null=False)
+    unit_price = models.FloatField(null=False)
     comments = models.TextField(null=True)
 
     order = models.OneToOneField(Order, on_delete=models.CASCADE)
-    item = models.OneToOneField(Item, on_delete=models.CASCADE)
+    item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='orders')

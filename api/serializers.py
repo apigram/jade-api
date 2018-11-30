@@ -1,6 +1,8 @@
 from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer
+from rest_framework_nested.relations import NestedHyperlinkedRelatedField
 from rest_framework import serializers
 from api.models import User, Company, CompanyContact, Order, Item, Contact, OrderItem
+import copy
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -11,32 +13,55 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 class CompanyContactsSerializer(NestedHyperlinkedModelSerializer):
     parent_lookup_kwargs = {
-        'contact_pk': 'contact__pk'
+        'company_pk': 'company__pk'
     }
 
+    contact = serializers.HyperlinkedRelatedField(
+        view_name='contact-detail',
+        many=False,
+        read_only=True
+    )
+
     class Meta:
-        model = Contact
-        fields = ('first_name', 'last_name', 'role', 'phone', 'email', 'address')
+        model = CompanyContact
+        fields = ('contact',)
 
 
 class CompanySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Company
-        fields = ('url', 'name', 'contacts', 'business_number', 'type')
+        fields = ('url', 'name', 'business_number', 'type', 'contacts')
 
     contacts = CompanyContactsSerializer(many=True, read_only=False)
 
     def create(self, validated_data):
-        client_data = validated_data
+        client_data = copy.deepcopy(validated_data)
         del client_data['contacts']
         contact_list_data = validated_data['contacts']
         company = Company(**client_data)
         company.save()
         for contact_data in contact_list_data:
-            contact = CompanyContact(**contact_data)
-            contact.company = company
+            contact = Contact(**contact_data)
             contact.save()
+            companycontact = CompanyContact()
+            companycontact.company = company
+            companycontact.contact = contact
+            companycontact.save()
         return company
+
+
+class ClientSerializer(CompanySerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name='client-detail',
+        lookup_field='pk'
+    )
+
+
+class SupplierSerializer(CompanySerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name='supplier-detail',
+        lookup_field='pk'
+    )
 
 
 class OrderItemSerializers(NestedHyperlinkedModelSerializer):
@@ -44,9 +69,21 @@ class OrderItemSerializers(NestedHyperlinkedModelSerializer):
         'order_pk': 'order__pk'
     }
 
+    order = serializers.HyperlinkedRelatedField(
+        view_name='order-detail',
+        many=False,
+        read_only=True
+    )
+
+    item = serializers.HyperlinkedRelatedField(
+        view_name='item-detail',
+        many=False,
+        read_only=True
+    )
+
     class Meta:
         model = OrderItem
-        fields = ('url', 'order', 'item', 'quantity', 'price', 'comments')
+        fields = ('order', 'item', 'quantity', 'unit_price', 'comments')
 
 
 class ItemOrderSerializers(NestedHyperlinkedModelSerializer):
@@ -54,9 +91,21 @@ class ItemOrderSerializers(NestedHyperlinkedModelSerializer):
         'item_pk': 'item__pk'
     }
 
+    order = serializers.HyperlinkedRelatedField(
+        view_name='order-detail',
+        many=False,
+        read_only=True
+    )
+
+    item = serializers.HyperlinkedRelatedField(
+        view_name='item-detail',
+        many=False,
+        read_only=True
+    )
+
     class Meta:
         model = OrderItem
-        fields = ('url', 'order', 'item', 'quantity', 'price', 'comments')
+        fields = ('order', 'item', 'quantity', 'price', 'comments')
 
 
 class OrderCompanySerializer(NestedHyperlinkedModelSerializer):
@@ -74,11 +123,15 @@ class OrderCompanySerializer(NestedHyperlinkedModelSerializer):
 class OrderSerializer(serializers.HyperlinkedModelSerializer):
     client = serializers.HyperlinkedRelatedField(
         view_name="client-detail",
-        lookup_field='client_pk',
+        many=False,
+        read_only=False,
+        queryset=Company.objects.filter(type='CLIENT')
     )
     supplier = serializers.HyperlinkedRelatedField(
         view_name="supplier-detail",
-        lookup_field='supplier_pk',
+        many=False,
+        read_only=False,
+        queryset=Company.objects.filter(type='SUPPLIER')
     )
 
     class Meta:
@@ -94,7 +147,20 @@ class OrderSerializer(serializers.HyperlinkedModelSerializer):
             'status',
             'comments'
         )
+
     items = OrderItemSerializers(many=True, read_only=False)
+
+    def create(self, validated_data):
+        order_data = copy.deepcopy(validated_data)
+        del order_data['items']
+        item_list_data = validated_data['items']
+        order = Order(**order_data)
+        order.save()
+        for item_data in item_list_data:
+            order_item = OrderItem(**item_data)
+            order_item.order = order
+            order_item.save()
+        return order
 
 
 class ItemSerializer(serializers.HyperlinkedModelSerializer):
