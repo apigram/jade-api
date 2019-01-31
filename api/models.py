@@ -63,7 +63,7 @@ class Company(models.Model):
     # Project how late an order made on the current date is likely to be delivered.
     def project_delivery_overflow(self):
         # Update supplier reliability using the list of late orders
-        supplier_orders = Order.objects.filter(supplier=self.id).all()
+        supplier_orders = Order.objects.filter(supplier=self.pk).all()
         df = pio.read_frame(supplier_orders)
 
         df['overflow'] = df[['delivered_date', 'scheduled_delivery_date']].apply(impute_overflow_days, axis=1)
@@ -79,7 +79,7 @@ class Company(models.Model):
 
     # Update the reliability of the supplier based on how many orders have been late this month
     def update_reliability(self):
-        supplier_orders = Order.objects.filter(supplier=self.id).all()
+        supplier_orders = Order.objects.filter(supplier=self.pk).all()
         df = pio.read_frame(supplier_orders)
 
         df['delivery_on_time'] = df[['delivered_date', 'scheduled_delivery_date']].apply(impute_delivery_on_time, axis=1)
@@ -93,14 +93,16 @@ class Company(models.Model):
         x_pred = datetime.today()
         y_pred = model.predict(x_pred)
 
+        return y_pred
+
     # Gets the monthly received orders from a specific client.
     # Suppliers can use this data to determine the average volume of orders they will likely receive from the client.
     def get_monthly_received_orders(self):
-        monthly_orders = Order.objects.filter(client_id=self.id, received_date__month=datetime.today().month)
+        monthly_orders = Order.objects.filter(client_id=self.pk, received_date__month=datetime.today().month)
         return monthly_orders
 
     def get_monthly_orders(self):
-        monthly_orders = Order.objects.filter(supplier_id=self.id, received_date__month=datetime.today().month)
+        monthly_orders = Order.objects.filter(supplier_id=self.pk, received_date__month=datetime.today().month)
         return monthly_orders
 
 
@@ -120,14 +122,14 @@ class Item(models.Model):
 
     # Determine a new low stock threshold
     def project_low_stock_threshold(self):
-        item_orders = OrderItem.objects.filter(item=self.id)
+        item_orders = OrderItem.objects.filter(item=self.pk)
         df = pio.read_frame(item_orders)
         # Process dataframe, train a ML model and make a projection to assign to that item.
         # Assign the projection to the item
 
     # Get the projected sales for the given item for the current month using the figures from the previous month.
     def project_sales(self):
-        item_orders = OrderItem.objects.filter(item_id=self.id).all()
+        item_orders = OrderItem.objects.filter(item_id=self.pk).all()
         df = pio.read_frame(item_orders)
         x_train = df['month']
         y_train = df['total_sales']
@@ -135,7 +137,7 @@ class Item(models.Model):
 
         model.fit(x_train, y_train)
 
-        x_pred = datetime.month
+        x_pred = datetime.today().month
         y_pred = model.predict(x_pred)
 
         return y_pred
@@ -143,7 +145,7 @@ class Item(models.Model):
     # Gets a list of all orders for the specified item.
     # The ML algorithms will use this data to determine low stock thresholds for a given item.
     def get_item_orders(self):
-        orders = OrderItem.objects.filter(item_id=self.id).all()
+        orders = OrderItem.objects.filter(item_id=self.pk).all()
         return orders
 
 
