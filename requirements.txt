@@ -4,3 +4,4 @@ drf-nested-routers
 django-pandas
 numpy
 sklearn
+django-cors-headers

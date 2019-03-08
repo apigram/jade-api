@@ -72,18 +72,18 @@ class OrderItemSerializers(NestedHyperlinkedModelSerializer):
     order = serializers.HyperlinkedRelatedField(
         view_name='order-detail',
         many=False,
-        read_only=True
+        read_only=True,
     )
 
     item = serializers.HyperlinkedRelatedField(
         view_name='item-detail',
         many=False,
-        read_only=True
+        read_only=True,
     )
 
     class Meta:
         model = OrderItem
-        fields = ('order', 'item', 'quantity', 'unit_price', 'comments')
+        fields = ('url', 'order', 'item', 'quantity', 'unit_price', 'comments')
 
 
 class ItemOrderSerializers(NestedHyperlinkedModelSerializer):
@@ -100,12 +100,12 @@ class ItemOrderSerializers(NestedHyperlinkedModelSerializer):
     item = serializers.HyperlinkedRelatedField(
         view_name='item-detail',
         many=False,
-        read_only=True
+        read_only=True,
     )
 
     class Meta:
         model = OrderItem
-        fields = ('order', 'item', 'quantity', 'price', 'comments')
+        fields = ('url', 'order', 'item', 'quantity', 'price', 'comments')
 
 
 class OrderCompanySerializer(NestedHyperlinkedModelSerializer):
@@ -168,7 +168,7 @@ class ItemSerializer(serializers.HyperlinkedModelSerializer):
         model = Item
         fields = ('url', 'orders', 'label', 'quantity', 'unit_price')
 
-    orders = OrderItemSerializers(many=True, read_only=True)
+    orders = ItemOrderSerializers(many=True, read_only=True)
 
 
 class ContactSerializer(serializers.HyperlinkedModelSerializer):
