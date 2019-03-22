@@ -71,7 +71,7 @@ class OrderItemSerializers(NestedHyperlinkedModelSerializer):
 
     item = serializers.HyperlinkedRelatedField(
         view_name='item-detail',
-        many=False,
+        many=True,
         read_only=True,
     )
 
@@ -125,7 +125,7 @@ class OrderSerializer(serializers.HyperlinkedModelSerializer):
             'comments'
         )
 
-    items = OrderItemSerializers(many=True, read_only=False)
+    items = OrderItemSerializers(many=True, read_only=True)
 
     def create(self, validated_data):
         order_data = copy.deepcopy(validated_data)
