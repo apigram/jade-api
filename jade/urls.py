@@ -13,10 +13,10 @@ router.register(r'supplier', views.SupplierViewSet, basename='supplier')
 router.register(r'contact', views.ContactViewSet)
 
 order_router = routers.NestedDefaultRouter(router, r'order', lookup='order')
-order_router.register(r'item', views.OrderItemViewSet, base_name='order_item')
+order_router.register(r'item', views.OrderItemViewSet, base_name='order-item')
 
 item_router = routers.NestedDefaultRouter(router, r'item', lookup='item')
-item_router.register(r'order', views.ItemOrderViewSet, base_name='item_order')
+item_router.register(r'order', views.ItemOrderViewSet, base_name='item-order')
 
 client_router = routers.NestedDefaultRouter(router, r'client', lookup='company')
 client_router.register(r'contact', views.CompanyContactViewSet, base_name='client_contact')

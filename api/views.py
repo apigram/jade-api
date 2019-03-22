@@ -40,13 +40,13 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
-        return OrderItem.objects.filter(order=self.kwargs['order_pk']).all()
+        return OrderItem.objects.filter(order=self.kwargs['order_pk'])
     serializer_class = OrderItemSerializers
 
 
 class ItemOrderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
-        return OrderItem.objects.filter(item=self.kwargs['item_pk']).all()
+        return OrderItem.objects.filter(item=self.kwargs['item_pk'])
     serializer_class = ItemOrderSerializers
 
 

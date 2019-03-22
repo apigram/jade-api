@@ -156,7 +156,7 @@ class Order(models.Model):
     status = models.CharField(max_length=100, null=False)
     comments = models.TextField(null=True)
 
-    items = models.ManyToManyField(Item, through='OrderItem')
+    items = models.ManyToManyField(Item, through='OrderItem', related_name='order')
     client = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='client_orders')
     supplier = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='supplier_orders')
 
@@ -166,6 +166,6 @@ class OrderItem(models.Model):
     unit_price = models.FloatField(null=False)
     comments = models.TextField(null=True)
 
-    order = models.OneToOneField(Order, on_delete=models.CASCADE)
-    item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='orders')
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='orders')
 

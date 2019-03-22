@@ -66,14 +66,8 @@ class SupplierSerializer(CompanySerializer):
 
 class OrderItemSerializers(NestedHyperlinkedModelSerializer):
     parent_lookup_kwargs = {
-        'order_pk': 'order__pk'
+        'order_pk': 'order__pk',
     }
-
-    order = serializers.HyperlinkedRelatedField(
-        view_name='order-detail',
-        many=False,
-        read_only=True,
-    )
 
     item = serializers.HyperlinkedRelatedField(
         view_name='item-detail',
@@ -83,41 +77,23 @@ class OrderItemSerializers(NestedHyperlinkedModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = ('url', 'order', 'item', 'quantity', 'unit_price', 'comments')
+        fields = ('item', 'quantity', 'unit_price', 'comments')
 
 
 class ItemOrderSerializers(NestedHyperlinkedModelSerializer):
     parent_lookup_kwargs = {
-        'item_pk': 'item__pk'
+        'item_pk': 'item__pk',
     }
 
     order = serializers.HyperlinkedRelatedField(
         view_name='order-detail',
-        many=False,
-        read_only=True
-    )
-
-    item = serializers.HyperlinkedRelatedField(
-        view_name='item-detail',
         many=False,
         read_only=True,
     )
 
     class Meta:
         model = OrderItem
-        fields = ('url', 'order', 'item', 'quantity', 'price', 'comments')
-
-
-class OrderCompanySerializer(NestedHyperlinkedModelSerializer):
-    parent_lookup_kwargs = {
-        'order_pk': 'order__pk'
-    }
-
-    class Meta:
-        model = Company
-        fields = ('url', 'name', 'contacts', 'business_number', 'type')
-
-    contacts = CompanyContactsSerializer(many=True, read_only=True)
+        fields = ('order', 'quantity', 'unit_price', 'comments')
 
 
 class OrderSerializer(serializers.HyperlinkedModelSerializer):
@@ -127,6 +103,7 @@ class OrderSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         queryset=Company.objects.filter(type='CLIENT')
     )
+
     supplier = serializers.HyperlinkedRelatedField(
         view_name="supplier-detail",
         many=False,
