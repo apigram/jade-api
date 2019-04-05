@@ -1,7 +1,7 @@
 from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer
 from rest_framework_nested.relations import NestedHyperlinkedRelatedField
 from rest_framework import serializers
-from api.models import User, Company, CompanyContact, Order, Item, Contact, OrderItem
+from api.models import User, Company, CompanyContact, Order, Item, Contact, OrderItem, State
 import copy
 
 
@@ -71,7 +71,7 @@ class OrderItemSerializers(NestedHyperlinkedModelSerializer):
 
     item = serializers.HyperlinkedRelatedField(
         view_name='item-detail',
-        many=True,
+        many=False,
         read_only=True,
     )
 
@@ -97,6 +97,7 @@ class ItemOrderSerializers(NestedHyperlinkedModelSerializer):
 
 
 class OrderSerializer(serializers.HyperlinkedModelSerializer):
+
     client = serializers.HyperlinkedRelatedField(
         view_name="client-detail",
         many=False,
@@ -109,6 +110,13 @@ class OrderSerializer(serializers.HyperlinkedModelSerializer):
         many=False,
         read_only=False,
         queryset=Company.objects.filter(type='SUPPLIER')
+    )
+
+    status = serializers.SlugRelatedField(
+        slug_field='title',
+        many=False,
+        read_only=False,
+        queryset=State.objects.all()
     )
 
     class Meta:
@@ -125,8 +133,6 @@ class OrderSerializer(serializers.HyperlinkedModelSerializer):
             'comments'
         )
 
-    items = OrderItemSerializers(many=True, read_only=True)
-
     def create(self, validated_data):
         order_data = copy.deepcopy(validated_data)
         del order_data['items']
@@ -138,6 +144,8 @@ class OrderSerializer(serializers.HyperlinkedModelSerializer):
             order_item.order = order
             order_item.save()
         return order
+
+    items = OrderItemSerializers(many=True, read_only=True)
 
 
 class ItemSerializer(serializers.HyperlinkedModelSerializer):
@@ -152,3 +160,18 @@ class ContactSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Contact
         fields = ('first_name', 'last_name', 'role', 'phone', 'email', 'address')
+
+
+class StateSerializer(serializers.HyperlinkedModelSerializer):
+    previous_state = serializers.SlugRelatedField(
+        slug_field='title',
+        many=False,
+        read_only=False,
+        required=False,
+        queryset=State.objects.all(),
+        allow_null=True
+    )
+
+    class Meta:
+        model = State
+        fields = ('url', 'label', 'title', 'description', 'previous_state', 'next_state')

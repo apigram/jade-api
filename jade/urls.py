@@ -11,6 +11,7 @@ router.register(r'order', views.OrderViewSet)
 router.register(r'client', views.ClientViewSet, basename='client')
 router.register(r'supplier', views.SupplierViewSet, basename='supplier')
 router.register(r'contact', views.ContactViewSet)
+router.register(r'state', views.StateViewSet)
 
 order_router = routers.NestedDefaultRouter(router, r'order', lookup='order')
 order_router.register(r'item', views.OrderItemViewSet, base_name='order-item')

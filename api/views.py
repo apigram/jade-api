@@ -1,9 +1,9 @@
-from api.models import Company, User, Order, Item, OrderItem, Contact, CompanyContact
+from api.models import Company, User, Order, Item, OrderItem, Contact, CompanyContact, State
 from rest_framework import viewsets, response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from api.serializers import UserSerializer, ClientSerializer, SupplierSerializer, ItemSerializer, OrderSerializer, OrderItemSerializers, CompanyContactsSerializer, ItemOrderSerializers, ContactSerializer
+from api.serializers import UserSerializer, ClientSerializer, SupplierSerializer, ItemSerializer, OrderSerializer, OrderItemSerializers, CompanyContactsSerializer, ItemOrderSerializers, ContactSerializer, StateSerializer
 
 
 # Create your views here.
@@ -71,3 +71,8 @@ class CustomAuthToken(ObtainAuthToken):
                 'email': user.email
             }
         })
+
+
+class StateViewSet(viewsets.ModelViewSet):
+    queryset = State.objects.all()
+    serializer_class = StateSerializer

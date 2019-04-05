@@ -25,6 +25,14 @@ def impute_delivery_on_time(cols):
         return 1
 
 
+class State(models.Model):
+    label = models.CharField(max_length=100, null=False)
+    title = models.CharField(max_length=100, null=False)
+    description = models.CharField(max_length=300, null=True)
+
+    previous_state = models.ForeignKey('self', null=True, on_delete=models.SET_NULL, related_name='next_state')
+
+
 class Contact(models.Model):
     first_name = models.CharField(max_length=100, null=False)
     last_name = models.CharField(max_length=100, null=False)
@@ -129,7 +137,7 @@ class Item(models.Model):
 
     # Get the projected sales for the given item for the current month using the figures from the previous month.
     def project_sales(self):
-        item_orders = OrderItem.objects.filter(item_id=self.pk).all()
+        item_orders = OrderItem.objects.filter(item=self.pk).all()
         df = pio.read_frame(item_orders)
         x_train = df['month']
         y_train = df['total_sales']
@@ -145,7 +153,7 @@ class Item(models.Model):
     # Gets a list of all orders for the specified item.
     # The ML algorithms will use this data to determine low stock thresholds for a given item.
     def get_item_orders(self):
-        orders = OrderItem.objects.filter(item_id=self.pk).all()
+        orders = OrderItem.objects.filter(item=self.pk).all()
         return orders
 
 
@@ -153,12 +161,12 @@ class Order(models.Model):
     received_date = models.DateTimeField(default=datetime.now)
     scheduled_deliver_date = models.DateTimeField(null=True)
     delivered_date = models.DateTimeField(null=True)
-    status = models.CharField(max_length=100, null=False)
     comments = models.TextField(null=True)
 
-    items = models.ManyToManyField(Item, through='OrderItem', related_name='order')
+    order_items = models.ManyToManyField(Item, through='OrderItem', related_name='order')
     client = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='client_orders')
     supplier = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='supplier_orders')
+    status = models.ForeignKey(State, on_delete=models.CASCADE, related_name='order')
 
 
 class OrderItem(models.Model):
@@ -166,6 +174,5 @@ class OrderItem(models.Model):
     unit_price = models.FloatField(null=False)
     comments = models.TextField(null=True)
 
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='orders')
-
