@@ -1,5 +1,4 @@
 from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer
-from rest_framework_nested.relations import NestedHyperlinkedRelatedField
 from rest_framework import serializers
 from api.models import User, Company, CompanyContact, Order, Item, Contact, OrderItem, State
 import copy
