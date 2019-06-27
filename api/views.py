@@ -1,9 +1,9 @@
-from api.models import Company, User, Order, Item, OrderItem, Contact, CompanyContact, State
+from api.models import Company, ApiUser, Order, Item, OrderItem, Contact, CompanyContact, State
 from rest_framework import viewsets, response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from api.serializers import UserSerializer, ClientSerializer, SupplierSerializer, ItemSerializer, OrderSerializer, OrderItemSerializers, CompanyContactsSerializer, ItemOrderSerializers, ContactSerializer, StateSerializer
+from api.serializers import UserSerializer, CompanySerializer, ItemSerializer, OrderSerializer, OrderItemSerializers, CompanyContactsSerializer, ItemOrderSerializers, ContactSerializer, StateSerializer
 
 
 # Create your views here.
@@ -15,16 +15,16 @@ class ContactViewSet(viewsets.ModelViewSet):
 
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.filter(type='CLIENT').all()
-    serializer_class = ClientSerializer
+    serializer_class = CompanySerializer
 
 
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.filter(type='SUPPLIER').all()
-    serializer_class = SupplierSerializer
+    serializer_class = CompanySerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = ApiUser.objects.all()
     serializer_class = UserSerializer
 
 
@@ -50,6 +50,11 @@ class ItemOrderViewSet(viewsets.ModelViewSet):
     serializer_class = ItemOrderSerializers
 
 
+class CompanyViewSet(viewsets.ModelViewSet):
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
+
+
 class CompanyContactViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return CompanyContact.objects.filter(company=self.kwargs['company_pk'])
@@ -63,12 +68,14 @@ class CustomAuthToken(ObtainAuthToken):
                                            context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+        api_user = ApiUser.objects.filter(user=user.pk).first()
         token, created = Token.objects.get_or_create(user=user)
         return Response({
             'user': {
                 'token': token.key,
                 'user_id': user.pk,
-                'email': user.email
+                'email': api_user.user.email,
+                'company': CompanySerializer(api_user.company, context={'request': request}).data['url']
             }
         })
 

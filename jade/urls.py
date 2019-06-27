@@ -10,6 +10,7 @@ router.register(r'item', views.ItemViewSet)
 router.register(r'order', views.OrderViewSet)
 router.register(r'client', views.ClientViewSet, basename='client')
 router.register(r'supplier', views.SupplierViewSet, basename='supplier')
+router.register(r'company', views.CompanyViewSet)
 router.register(r'contact', views.ContactViewSet)
 router.register(r'state', views.StateViewSet)
 

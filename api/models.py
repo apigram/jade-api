@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from datetime import datetime
 import django_pandas.io as pio
 import django_pandas as pd
@@ -40,14 +41,6 @@ class Contact(models.Model):
     phone = models.CharField(max_length=20, null=False)
     email = models.CharField(max_length=100, null=False)
     address = models.CharField(max_length=200, null=False)
-
-
-class User(models.Model):
-    username = models.CharField(max_length=100, unique=True, null=False)
-    email = models.CharField(max_length=100, null=False)
-    password = models.CharField(max_length=1000, null=False)  # This value is hashed/salted.
-
-    contact = models.OneToOneField(Contact, on_delete=models.CASCADE, related_name='+')
 
 
 class Company(models.Model):
@@ -114,9 +107,19 @@ class Company(models.Model):
         return monthly_orders
 
 
+class ApiUser(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name='+')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="+")
+
+
 class CompanyContact(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='contacts')
-    contact = models.OneToOneField(Contact, on_delete=models.CASCADE, related_name='+')
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name='+')
 
 
 class Item(models.Model):

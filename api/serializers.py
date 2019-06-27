@@ -1,13 +1,13 @@
 from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer
 from rest_framework import serializers
-from api.models import User, Company, CompanyContact, Order, Item, Contact, OrderItem, State
-import copy
+from api.models import ApiUser, Company, CompanyContact, Order, Item, Contact, OrderItem, State
+from django.utils import timezone
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = User
-        fields = ('url', 'username', 'contact', 'email')
+        model = ApiUser
+        fields = ('url', 'username', 'contact', 'email', 'company')
 
 
 class CompanyContactsSerializer(NestedHyperlinkedModelSerializer):
@@ -34,33 +34,12 @@ class CompanySerializer(serializers.HyperlinkedModelSerializer):
     contacts = CompanyContactsSerializer(many=True, read_only=False)
 
     def create(self, validated_data):
-        client_data = copy.deepcopy(validated_data)
-        del client_data['contacts']
-        contact_list_data = validated_data['contacts']
-        company = Company(**client_data)
-        company.save()
+        contact_list_data = validated_data.pop('contacts')
+        company = Company.objects.create(**validated_data)
         for contact_data in contact_list_data:
-            contact = Contact(**contact_data)
-            contact.save()
-            companycontact = CompanyContact()
-            companycontact.company = company
-            companycontact.contact = contact
-            companycontact.save()
+            contact = Contact.objects.create(**contact_data)
+            CompanyContact.objects.create(company=company, contact=contact)
         return company
-
-
-class ClientSerializer(CompanySerializer):
-    url = serializers.HyperlinkedIdentityField(
-        view_name='client-detail',
-        lookup_field='pk'
-    )
-
-
-class SupplierSerializer(CompanySerializer):
-    url = serializers.HyperlinkedIdentityField(
-        view_name='supplier-detail',
-        lookup_field='pk'
-    )
 
 
 class OrderItemSerializers(NestedHyperlinkedModelSerializer):
@@ -71,7 +50,8 @@ class OrderItemSerializers(NestedHyperlinkedModelSerializer):
     item = serializers.HyperlinkedRelatedField(
         view_name='item-detail',
         many=False,
-        read_only=True,
+        read_only=False,
+        queryset=Item.objects.all()
     )
 
     class Meta:
@@ -98,14 +78,14 @@ class ItemOrderSerializers(NestedHyperlinkedModelSerializer):
 class OrderSerializer(serializers.HyperlinkedModelSerializer):
 
     client = serializers.HyperlinkedRelatedField(
-        view_name="client-detail",
+        view_name="company-detail",
         many=False,
         read_only=False,
-        queryset=Company.objects.filter(type='CLIENT')
+        queryset=Company.objects.all()
     )
 
     supplier = serializers.HyperlinkedRelatedField(
-        view_name="supplier-detail",
+        view_name="company-detail",
         many=False,
         read_only=False,
         queryset=Company.objects.filter(type='SUPPLIER')
@@ -117,6 +97,8 @@ class OrderSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         queryset=State.objects.all()
     )
+
+    items = OrderItemSerializers(many=True, read_only=False)
 
     class Meta:
         model = Order
@@ -133,18 +115,15 @@ class OrderSerializer(serializers.HyperlinkedModelSerializer):
         )
 
     def create(self, validated_data):
-        order_data = copy.deepcopy(validated_data)
-        del order_data['items']
-        item_list_data = validated_data['items']
-        order = Order(**order_data)
-        order.save()
+        item_list_data = validated_data.pop('items')
+        order = Order.objects.create(**validated_data)
+        order.received_date = timezone.now()
         for item_data in item_list_data:
-            order_item = OrderItem(**item_data)
-            order_item.order = order
+            order_item = OrderItem.objects.create(order=order, **item_data)
+            order_item.unit_price = order_item.item.unit_price
             order_item.save()
+        order.save()
         return order
-
-    items = OrderItemSerializers(many=True, read_only=True)
 
 
 class ItemSerializer(serializers.HyperlinkedModelSerializer):
