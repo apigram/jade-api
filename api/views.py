@@ -44,7 +44,7 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     serializer_class = OrderItemSerializers
 
 
-class ItemOrderViewSet(viewsets.ModelViewSet):
+class ItemOrderViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         return OrderItem.objects.filter(item=self.kwargs['item_pk'])
     serializer_class = ItemOrderSerializers

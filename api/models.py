@@ -59,7 +59,7 @@ class Company(models.Model):
     # This field needs only be set for companies of type SUPPLIER.
     # Indicates, as a percentage, how reliable the supplier is at dispatching deliveries on time.
     # This can be used as a factor of safety (FoS) to more accurately schedule deliveries.
-    delivery_reliability = models.FloatField()
+    delivery_reliability = models.FloatField(null=False, default=100.00)
 
     # Project how late an order made on the current date is likely to be delivered.
     def project_delivery_overflow(self):
@@ -127,7 +127,7 @@ class Item(models.Model):
     label = models.CharField(max_length=100, null=False)
     quantity = models.IntegerField(null=False)   # This represents the quantity held by the supplier or client
     unit_price = models.FloatField(null=False)   # Price per unit
-    low_stock_threshold = models.IntegerField()  # Threshold for which JADE will show low stock warnings.
+    low_stock_threshold = models.IntegerField(null=True)  # Threshold for which JADE will show low stock warnings.
 
     supplier = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="supplier_items")
 
